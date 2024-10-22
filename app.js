@@ -1,59 +1,37 @@
-// const express = require("express")
-//   const app = express()
-//   const PORT= 8080
-//   const path =require ("path")
-//   const filePath=path.join(__dirname,"/views/index.ejs")
-//   app.set('view engine', 'ejs');
-//   app.get("/",(req,res)=>{
-//     let name="Sam"
-//     let place ="Delhi"
-//     res.render(filePath,{name,destination:place})
-//   })
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const port = 3000;
 
-
-//   app.get("/welcome",(req,res)=>{
-
-//   })
-
-
-//   app.listen(PORT,(err)=>{
-//     if(err){
-//       console.log("err",err);
-//     }
-//       else{
-//         console.log(`Listening to PORT${PORT}`)
-//       }
-    
-//   })
-const express=require("express");
-const app=express();
-const PORT=8080;
-const path=require("path");
-const filepath=path.join(__dirname,"./views/index.ejs");
+// Middleware setup
 app.set('view engine', 'ejs');
-// app.get("/",(req,res)=>{
-//     let name="Sam";
-//     let place="Bengaluru"
-//     res.render(filepath,{name,destination:place});
-// })
-app.get("/welcome", (req, res) => {
-    let username = req.query.username || 'sam';  
-    let currentHour = new Date().getHours();
-    let greeting;
+app.use(bodyParser.urlencoded({ extended: true }));
 
-    if (currentHour < 12) {
-        greeting = "Good Morning";
-    } else {
-        greeting = "Good Evening";
-    }
-    res.render(filepath, { username, greeting });
+// Store tasks in an array
+let tasks = [];
+
+// GET route for the /todo page
+app.get('/todo', (req, res) => {
+    res.render('todo', { tasks });
 });
 
-app.listen(PORT,(err)=>{
-    if(err){
-        console.log(err);
-    } 
-    else{
-        console.log(`Listening on PORT ${PORT}`);
+// POST route to add a new task
+app.post('/add-task', (req, res) => {
+    const newTask = req.body.task;
+    if (newTask) {
+        tasks.push(newTask);
     }
-})
+    res.redirect('/todo');
+});
+
+// POST route to delete a task
+app.post('/delete-task', (req, res) => {
+    const taskToDelete = req.body.task;
+    tasks = tasks.filter(task => task !== taskToDelete);
+    res.redirect('/todo');
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
