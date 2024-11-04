@@ -1,51 +1,45 @@
-const express=require("express");
-const app=express();
-const PORT=8080;
-const path=require("path");
-const filepath=path.join(__dirname,"./views/index.ejs");
-// app.set('view engine', 'ejs');
-// app.use(express.urlencoded({ extended: true })); 
+const express = require("express");
+const path = require("path");
+const app = express();
+const PORT = 8080;
 
-
-// app.get("/",(req,res)=>{
-//     let name="Sam";
-//     let place="Bengaluru"
-//     res.render(filepath,{name,destination:place});
-// })
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views")); // Setting the views directory
 app.use(express.urlencoded({ extended: true }));
-let tasks = []; 
+
+let tasks = [];
 
 app.get("/welcome", (req, res) => {
-    let username = req.query.username || "sam";
-    let currentHour = new Date().getHours();
-    let greeting = currentHour < 12 ? "Good Morning" : "Good Evening";
+    const username = req.query.username || "sam";
+    const currentHour = new Date().getHours();
+    const greeting = currentHour < 12 ? "Good Morning" : "Good Evening";
     res.render("index", { username, greeting });
 });
+
+// Route for To-Do List Page
 app.get("/todo", (req, res) => {
-    // Render 'index2.ejs' (for to-do list)
     res.render("index2", { tasks });
 });
 
-// Add a new task
+// Add New Task
 app.post("/addTask", (req, res) => {
-    let newTask = req.body.task;
+    const newTask = req.body.task;
     if (newTask) {
-        tasks.push(newTask); // Add task to the array
+        tasks.push(newTask);
     }
-    res.redirect("/todo"); // Redirect to the to-do page after adding task
+    res.redirect("/todo");
 });
 
-// Delete a task
+// Delete Task
 app.post("/deleteTask", (req, res) => {
-    let taskIndex = req.body.taskIndex;
+    const taskIndex = parseInt(req.body.taskIndex, 10);
     if (taskIndex >= 0 && taskIndex < tasks.length) {
-        tasks.splice(taskIndex, 1); // Remove task from the array
+        tasks.splice(taskIndex, 1);
     }
-    res.redirect("/todo"); // Redirect to the to-do page after deleting task
+    res.redirect("/todo");
 });
 
-
+// Sample Products Array
 const products = [
     { name: "Laptop", price: 1200 },
     { name: "Smartphone", price: 800 },
@@ -53,15 +47,11 @@ const products = [
     { name: "Headphones", price: 150 },
     { name: "Smartwatch", price: 250 }
 ];
-const users = {
-    "john": { age: 25, hobby: "Football" },
-    "jane": { age: 22, hobby: "Painting" },
-    "sam": { age: 30, hobby: "Cooking" }
-};
-// Products route
+
+// Products Route with Search Functionality
 app.get("/products", (req, res) => {
-    let filteredProducts = products;
     const searchQuery = req.query.search;
+    let filteredProducts = products;
 
     if (searchQuery) {
         filteredProducts = products.filter(product =>
@@ -71,11 +61,18 @@ app.get("/products", (req, res) => {
 
     res.render("product", { products: filteredProducts });
 });
-app.get("/profile/:username", (req, res) => {
-    const username = req.params.username;
 
-    // Get user data based on the username
-    const user = users[username.toLowerCase()];
+// Sample Users Object
+const users = {
+    "john": { age: 25, hobby: "Football" },
+    "jane": { age: 22, hobby: "Painting" },
+    "sam": { age: 30, hobby: "Cooking" }
+};
+
+// Profile Route with Dynamic Username
+app.get("/profile/:username", (req, res) => {
+    const username = req.params.username.toLowerCase();
+    const user = users[username];
 
     if (user) {
         res.render("profile", { username, age: user.age, hobby: user.hobby });
@@ -83,11 +80,12 @@ app.get("/profile/:username", (req, res) => {
         res.status(404).send("User not found");
     }
 });
-app.listen(PORT,(err)=>{
-    if(err){
-        console.log(err);
-    } 
-    else{
-        console.log(`Listening on PORT ${PORT}`);
+
+// Start Server
+app.listen(PORT, (err) => {
+    if (err) {
+        console.error("Error starting server:", err);
+    } else {
+        console.log(`Server listening on http://localhost:${PORT}`);
     }
-})
+});
